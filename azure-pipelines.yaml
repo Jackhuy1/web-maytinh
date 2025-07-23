@@ -34,12 +34,11 @@ stages:
     - task: Docker@2
       displayName: Build and Push Docker image
       inputs:
-        containerRegistry: $(azureSubscription)
-        repository: $(azureContainerRegistry)/$(imageRepository)
-        command: buildAndPush
+        containerRegistry: 'shop-acr'
+        repository: '$(azureContainerRegistry)/$(imageRepository)'
+        command: 'buildAndPush'
         Dockerfile: '**/Dockerfile'
-        tags: |
-          $(imageTag)
+        tags: '$(imageTag)'
 
 - stage: Deploy
   dependsOn: Build
