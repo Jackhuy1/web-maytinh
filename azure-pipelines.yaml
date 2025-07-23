@@ -42,10 +42,10 @@ stages:
       displayName: Build and Push Docker image
       inputs:
         containerRegistry: $(dockerRegistryServiceConnection)
-        repository: '$(azureContainerRegistry)/$(imageRepository)'
-        command: 'buildAndPush'
+        repository: $(azureContainerRegistry)/$(imageRepository)
+        command: buildAndPush
         Dockerfile: '**/Dockerfile'
-        tags: '$(imageTag)'
+        tags: $(imageTag)
 
 - stage: Deploy
   dependsOn: Build
