@@ -6,6 +6,7 @@ trigger:
 variables:
   azureSubscription: 'aks-service-connection'  # Replace with your Azure service connection name in Azure DevOps
   azureContainerRegistry: 'terratamldacr.azurecr.io'           # Replace with your ACR login server
+  dockerRegistryServiceConnection: 'shop-acr'
   imageRepository: 'php-mysql-app'                          # Image repository name
   imageTag: '$(Build.BuildId)'
   kubernetesNamespace: 'default'                            # Change if you want to deploy to a different namespace
@@ -34,7 +35,7 @@ stages:
     - task: Docker@2
       displayName: Build and Push Docker image
       inputs:
-        containerRegistry: 'shop-acr'
+        containerRegistry: $(dockerRegistryServiceConnection)
         repository: '$(azureContainerRegistry)/$(imageRepository)'
         command: 'buildAndPush'
         Dockerfile: '**/Dockerfile'
