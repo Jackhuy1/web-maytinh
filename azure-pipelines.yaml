@@ -1,0 +1,68 @@
+trigger:
+  branches:
+    include:
+      - main
+
+variables:
+  azureSubscription: 'aks-service-connection'  # Replace with your Azure service connection name in Azure DevOps
+  azureContainerRegistry: 'terratamldacr.azurecr.io'           # Replace with your ACR login server
+  imageRepository: 'php-mysql-app'                          # Image repository name
+  imageTag: '$(Build.BuildId)'
+  kubernetesNamespace: 'default'                            # Change if you want to deploy to a different namespace
+  k8sClusterName: 'terra-aks'                  # Replace with your AKS Cluster name
+  resourceGroupName: 'terraform-aks'              # Replace with your AKS Resource Group name
+
+stages:
+- stage: Build
+  displayName: 'Build and push Docker image'
+  jobs:
+  - job: Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Checkout@1
+
+    - task: AzureCLI@2
+      name: LoginACR
+      inputs:
+        azureSubscription: $(azureSubscription)
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az acr login --name $(azureContainerRegistry)
+
+    - task: Docker@2
+      displayName: Build and Push Docker image
+      inputs:
+        containerRegistry: $(azureSubscription)
+        repository: $(azureContainerRegistry)/$(imageRepository)
+        command: buildAndPush
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          $(imageTag)
+
+- stage: Deploy
+  dependsOn: Build
+  condition: succeeded()
+  displayName: 'Deploy to AKS'
+  jobs:
+  - deployment: DeployToAKS
+    environment: 'aks'
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: $(azureSubscription)
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az aks get-credentials --resource-group $(resourceGroupName) --name $(k8sClusterName) --overwrite-existing
+
+                kubectl apply -f k8s/deployment.yaml -n $(kubernetesNamespace)
+                kubectl apply -f k8s/service.yaml -n $(kubernetesNamespace)
+
+                kubectl set image deployment/php-mysql-app-deployment php-mysql-app-container=$(azureContainerRegistry)/$(imageRepository):$(imageTag) -n $(kubernetesNamespace)
