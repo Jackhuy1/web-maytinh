@@ -1,36 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: php-mysql-app-deployment
+  name: webmaytinh
   labels:
-    app: php-mysql-app
+    app: webmaytinh
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: php-mysql-app
+      app: webmaytinh
   template:
     metadata:
       labels:
-        app: php-mysql-app
+        app: webmaytinh
     spec:
       containers:
-      - name: php-mysql-app-container
-        image: terratamldacr.azurecr.io/php-mysql-app:latest  # This will be updated by kubectl set image command in pipeline
+      - name: webmaytinh
+        image: tamldacr.azurecr.io/webmaytinh  # This will be updated by kubectl set image command in pipeline
         ports:
         - containerPort: 80
-        env:
-        - name: MYSQL_HOST
-          value: mysql-service       # Change this if your MySQL service name differs
-        - name: MYSQL_USER
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: username
-        - name: MYSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: password
-        - name: MYSQL_DATABASE
-          value: your_db_name        # Replace with your MySQL database name
