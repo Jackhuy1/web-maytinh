@@ -39,7 +39,7 @@ env:
   CONTAINER_NAME: "webmaytinh"
   RESOURCE_GROUP: "tamld"
   CLUSTER_NAME: "tamld-aks"
-  DEPLOYMENT_MANIFEST_PATH: "k8s/*"
+  DEPLOYMENT_MANIFEST_PATH: "k8s"
 
 jobs:
   buildImage:
