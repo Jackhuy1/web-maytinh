@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
 RUN a2enmod rewrite
 
 # Copy your PHP source code into the container's web root
-COPY ./src/ /var/www/html/
+COPY . /var/www/html/
 
 # Set working directory
 WORKDIR /var/www/html
